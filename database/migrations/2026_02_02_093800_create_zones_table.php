@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('vehicles', function (Blueprint $table) {
+        Schema::create('zones', function (Blueprint $table) {
             $table->id();
-            $table->string('brand');
-            $table->string('model');
-            $table->string('license_plate')->unique();
-            $table->enum('type', ['regular', 'electric', 'motorcycle'])->default('regular');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('name'); // e.g., "Visitors", "Staff", "Electric"
+            $table->string('description')->nullable();
+            $table->integer('max_spots')->default(0);
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('vehicles');
+        Schema::dropIfExists('zones');
     }
 };
