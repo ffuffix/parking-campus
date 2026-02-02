@@ -12,7 +12,8 @@ class ParkingSpotController extends Controller
      */
     public function index()
     {
-        //
+        $parkingSpots = ParkingSpot::all();
+        return response()->json($parkingSpots); // currently returns raw JSON, change this to a view
     }
 
     /**
@@ -20,7 +21,7 @@ class ParkingSpotController extends Controller
      */
     public function create()
     {
-        //
+        return view('parkingSpots.create');
     }
 
     /**
@@ -28,7 +29,15 @@ class ParkingSpotController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'spot_number' => 'required|string|max:10|unique:parking_spots,spot_number',
+            'level' => 'required|integer',
+            'is_reserved' => 'required|boolean',
+        ]);
+
+        $parkingSpot = ParkingSpot::create($validated);
+
+        return redirect()->route('parkingSpots.show', $parkingSpot);
     }
 
     /**
@@ -36,7 +45,7 @@ class ParkingSpotController extends Controller
      */
     public function show(ParkingSpot $parkingSpot)
     {
-        //
+        return view('parkingSpots.show', compact('parkingSpot'));
     }
 
     /**
@@ -44,7 +53,7 @@ class ParkingSpotController extends Controller
      */
     public function edit(ParkingSpot $parkingSpot)
     {
-        //
+        return view('parkingSpots.edit', compact('parkingSpot'));
     }
 
     /**
@@ -52,7 +61,15 @@ class ParkingSpotController extends Controller
      */
     public function update(Request $request, ParkingSpot $parkingSpot)
     {
-        //
+        $validated = $request->validate([
+            'spot_number' => 'required|string|max:10|unique:parking_spots,spot_number,' . $parkingSpot->id,
+            'level' => 'required|integer',
+            'is_reserved' => 'required|boolean',
+        ]);
+
+        $parkingSpot->update($validated);
+
+        return redirect()->route('parkingSpots.show', $parkingSpot);
     }
 
     /**
@@ -60,6 +77,8 @@ class ParkingSpotController extends Controller
      */
     public function destroy(ParkingSpot $parkingSpot)
     {
-        //
+        $parkingSpot->delete();
+
+        return redirect()->route('parkingSpots.index');
     }
 }

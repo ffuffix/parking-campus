@@ -12,7 +12,8 @@ class ReservationController extends Controller
      */
     public function index()
     {
-        //
+        $reservations = Reservation::all();
+        return response()->json($reservations); // currently returns raw JSON, change this to a view
     }
 
     /**
@@ -20,7 +21,7 @@ class ReservationController extends Controller
      */
     public function create()
     {
-        //
+        return view('reservations.create');
     }
 
     /**
@@ -28,7 +29,15 @@ class ReservationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'reservation_date' => 'required|date',
+            'number_of_guests' => 'required|integer|min:1',
+        ]);
+
+        $reservation = Reservation::create($validated);
+
+        return redirect()->route('reservations.show', $reservation);
     }
 
     /**
@@ -36,7 +45,7 @@ class ReservationController extends Controller
      */
     public function show(Reservation $reservation)
     {
-        //
+        return view('reservations.show', compact('reservation'));
     }
 
     /**
@@ -44,7 +53,7 @@ class ReservationController extends Controller
      */
     public function edit(Reservation $reservation)
     {
-        //
+        return view('reservations.edit', compact('reservation'));
     }
 
     /**
@@ -52,7 +61,15 @@ class ReservationController extends Controller
      */
     public function update(Request $request, Reservation $reservation)
     {
-        //
+        $validated = $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'reservation_date' => 'required|date',
+            'number_of_guests' => 'required|integer|min:1',
+        ]);
+
+        $reservation->update($validated);
+
+        return redirect()->route('reservations.show', $reservation);
     }
 
     /**
@@ -60,6 +77,8 @@ class ReservationController extends Controller
      */
     public function destroy(Reservation $reservation)
     {
-        //
+        $reservation->delete();
+
+        return redirect()->route('reservations.index');
     }
 }

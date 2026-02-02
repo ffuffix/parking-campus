@@ -12,7 +12,10 @@ class VehicleController extends Controller
      */
     public function index()
     {
-        //
+        $vehicles = Vehicle::all();
+        return response()->json($vehicles); // currently returns raw JSON, change this to a view
+
+        // pagination can also be implemented here
     }
 
     /**
@@ -20,7 +23,7 @@ class VehicleController extends Controller
      */
     public function create()
     {
-        //
+        return view('vehicles.create');
     }
 
     /**
@@ -28,7 +31,15 @@ class VehicleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'license_plate' => 'required|string|max:20|unique:vehicles,license_plate',
+            'model' => 'required|string|max:100',
+            'owner_name' => 'required|string|max:255',
+        ]);
+
+        $vehicle = Vehicle::create($validated);
+
+        return redirect()->route('vehicles.show', $vehicle);
     }
 
     /**
@@ -36,7 +47,7 @@ class VehicleController extends Controller
      */
     public function show(Vehicle $vehicle)
     {
-        //
+        return view('vehicles.show', compact('vehicle'));
     }
 
     /**
@@ -44,7 +55,7 @@ class VehicleController extends Controller
      */
     public function edit(Vehicle $vehicle)
     {
-        //
+        return view('vehicles.edit', compact('vehicle'));
     }
 
     /**
@@ -52,7 +63,15 @@ class VehicleController extends Controller
      */
     public function update(Request $request, Vehicle $vehicle)
     {
-        //
+        $validated = $request->validate([
+            'license_plate' => 'required|string|max:20|unique:vehicles,license_plate,' . $vehicle->id,
+            'model' => 'required|string|max:100',
+            'owner_name' => 'required|string|max:255',
+        ]);
+
+        $vehicle->update($validated);
+
+        return redirect()->route('vehicles.show', $vehicle);
     }
 
     /**
@@ -60,6 +79,8 @@ class VehicleController extends Controller
      */
     public function destroy(Vehicle $vehicle)
     {
-        //
+        $vehicle->delete();
+
+        return redirect()->route('vehicles.index');
     }
 }
