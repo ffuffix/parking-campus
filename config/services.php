@@ -14,6 +14,10 @@ return [
     |
     */
 
+    'car_api' => [
+        'base_url' => env('CAR_API_BASE_URL', 'https://myfakeapi.com'),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

@@ -16,10 +16,16 @@ class VehicleFactory extends Factory
      */
     public function definition(): array
     {
+        $carsData = app(\App\Services\CarAPI::class)->get_cars();
+        $car = fake()->randomElement($carsData['cars']);
+
         return [
-            'brand' => fake()->company(),
-            'model' => fake()->word(),
-            'license_plate' => strtoupper(fake()->bothify('???-####')),
+            'brand' => $car['car'],
+            'model' => $car['car_model'],
+            'vin' => $car['car_vin'] . '-' . fake()->unique()->numerify('####'), // Ensure uniqueness
+            'color' => $car['car_color'],
+            'year' => $car['car_model_year'],
+            'license_plate' => app(\App\Services\LicensePlateGenerator::class)->generate(),
             'type' => fake()->randomElement(['regular', 'electric', 'motorcycle']),
             'user_id' => \App\Models\User::factory(),
         ];

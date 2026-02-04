@@ -15,6 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('brand');
             $table->string('model');
+            $table->string('vin')->unique()->nullable();
+            $table->string('color')->nullable();
+            $table->integer('year')->nullable();
             $table->string('license_plate')->unique();
             $table->enum('type', ['regular', 'electric', 'motorcycle'])->default('regular');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
