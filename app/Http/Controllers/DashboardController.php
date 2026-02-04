@@ -21,12 +21,12 @@ class DashboardController extends Controller
     public function user()
     {
         $user = Auth::user();
-        $vehicles = $user->vehicles->with(['reservations' => function ($query) {
+        $vehicles = $user->vehicles()->with(['reservations' => function ($query) {
             $query->whereNotIn('status', ['cancelled', 'checked_out'])
                 ->orderBy('start_time', 'desc');
         }])->get();
 
-        $upcomingReservations = $user->reservations
+        $upcomingReservations = $user->reservations()
             ->whereNotIn('status', ['cancelled', 'checked_out'])
             ->where('start_time', '>', now())
             ->orderBy('start_time')

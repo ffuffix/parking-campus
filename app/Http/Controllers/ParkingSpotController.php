@@ -13,7 +13,7 @@ class ParkingSpotController extends Controller
     public function index()
     {
         $parkingSpots = ParkingSpot::all();
-        return response()->json($parkingSpots); // currently returns raw JSON, change this to a view
+        return view('dashboard-admin.parking-spots', compact('parkingSpots'));
     }
 
     /**

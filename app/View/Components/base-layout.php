@@ -57,7 +57,7 @@
                         <!-- Navigation Links -->
                         @auth
                         <div class="hidden space-x-8 sm:-my-px sm:ml-10 sm:flex">
-                            @if(auth()->user()->is_admin())
+                            @if(auth()->user()->is_admin)
                                 <x-nav-link :href="route('dashboard.admin')" :active="request()->routeIs('dashboard.admin')">
                                     {{ __('Dashboard') }}
                                 </x-nav-link>
@@ -134,7 +134,7 @@
             <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
                 <div class="pt-2 pb-3 space-y-1">
                     @auth
-                        @if(auth()->user()->is_admin())
+                        @if(auth()->user()->is_admin)
                             <x-responsive-nav-link :href="route('dashboard.admin')" :active="request()->routeIs('dashboard.admin')">
                                 {{ __('Dashboard') }}
                             </x-responsive-nav-link>

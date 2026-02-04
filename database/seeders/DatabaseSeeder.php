@@ -22,18 +22,21 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@email.com',
+            'password' => bcrypt('password'),
         ]);
 
         User::factory()->create([
             'name' => 'john',
             'email' => 'admin@email.com',
             'role' => 'admin',
+            'password' => bcrypt('password'),
         ]);
 
         User::factory()->create([
             'name' => 'bob',
             'email' => 'user@email.com',
             'role' => 'user',
+            'password' => bcrypt('password'),
         ]);
 
         // Create zones

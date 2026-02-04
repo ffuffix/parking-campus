@@ -12,10 +12,8 @@ class VehicleController extends Controller
      */
     public function index()
     {
-        $vehicles = Vehicle::all();
-        return response()->json($vehicles); // currently returns raw JSON, change this to a view
-
-        // pagination can also be implemented here
+        $vehicles = auth()->user()->vehicles;
+        return view('vehicles.index', compact('vehicles'));
     }
 
     /**
@@ -32,14 +30,16 @@ class VehicleController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'license_plate' => 'required|string|max:20|unique:vehicles,license_plate',
+            'brand' => 'required|string|max:255',
             'model' => 'required|string|max:100',
-            'owner_name' => 'required|string|max:255',
+            'license_plate' => 'required|string|max:20|unique:vehicles,license_plate',
+            'color' => 'nullable|string|max:50',
+            'type' => 'required|in:regular,electric,motorcycle',
         ]);
 
-        $vehicle = Vehicle::create($validated);
+        $request->user()->vehicles()->create($validated);
 
-        return redirect()->route('vehicles.show', $vehicle);
+        return redirect()->route('vehicles.index')->with('success', 'Vehicle registered successfully.');
     }
 
     /**
@@ -63,16 +63,25 @@ class VehicleController extends Controller
      */
     public function update(Request $request, Vehicle $vehicle)
     {
+        // Ensure user owns the vehicle
+        if ($vehicle->user_id !== auth()->id()) {
+            abort(403);
+        }
+
         $validated = $request->validate([
-            'license_plate' => 'required|string|max:20|unique:vehicles,license_plate,' . $vehicle->id,
+            'brand' => 'required|string|max:255',
             'model' => 'required|string|max:100',
-            'owner_name' => 'required|string|max:255',
+            'license_plate' => 'required|string|max:20|unique:vehicles,license_plate,' . $vehicle->id,
+            'color' => 'nullable|string|max:50',
+            'type' => 'required|in:regular,electric,motorcycle',
         ]);
 
         $vehicle->update($validated);
 
-        return redirect()->route('vehicles.show', $vehicle);
+        return redirect()->route('vehicles.index')->with('success', 'Vehicle updated successfully.');
     }
+        
+        
 
     /**
      * Remove the specified resource from storage.

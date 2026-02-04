@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -47,9 +48,11 @@ class User extends Authenticatable
         ];
     }
 
-    public function is_admin(): bool
+    protected function isAdmin(): Attribute
     {
-        return $this->role === 'admin';
+        return Attribute::make(
+            get: fn () => $this->role === 'admin',
+        );
     }
 
     public function reservations()
