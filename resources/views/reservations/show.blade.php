@@ -14,16 +14,16 @@
             <div class="flex justify-between items-start">
                 <div>
                     <h3 class="text-lg font-bold text-white mb-1">Spot {{ $reservation->parkingSpot->spot_number ?? 'N/A' }}</h3>
-                    <p class="text-zinc-400">Level {{ $reservation->parkingSpot->level ?? '-' }}</p>
+                    <p class="text-zinc-400">{{ $reservation->parkingSpot->zone->name ?? 'N/A' }} - {{ ucfirst($reservation->parkingSpot->type ?? '') }}</p>
                 </div>
                 @php
-                    $statusClasses = [
-                        'pending' => 'bg-yellow-900/30 text-yellow-400 border-yellow-900',
-                        'confirmed' => 'bg-green-900/30 text-green-400 border-green-900',
-                        'checked_in' => 'bg-blue-900/30 text-blue-400 border-blue-900',
-                        'checked_out' => 'bg-zinc-800 text-zinc-400 border-zinc-700',
-                        'cancelled' => 'bg-red-900/30 text-red-400 border-red-900',
-                    ];
+                $statusClasses = [
+                'pending' => 'bg-yellow-900/30 text-yellow-400 border-yellow-900',
+                'confirmed' => 'bg-green-900/30 text-green-400 border-green-900',
+                'checked_in' => 'bg-blue-900/30 text-blue-400 border-blue-900',
+                'checked_out' => 'bg-zinc-800 text-zinc-400 border-zinc-700',
+                'cancelled' => 'bg-red-900/30 text-red-400 border-red-900',
+                ];
                 @endphp
                 <span class="px-3 py-1 rounded-full text-sm border {{ $statusClasses[$reservation->status] ?? 'bg-zinc-800 text-zinc-400 border-zinc-700' }}">
                     {{ ucfirst(str_replace('_', ' ', $reservation->status)) }}
@@ -58,13 +58,14 @@
             </div>
 
             @if($reservation->status === 'pending' || $reservation->status === 'confirmed')
-                <div class="pt-6 border-t border-zinc-800 flex justify-end">
-                    <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" onsubmit="return confirm('Cancel this reservation?')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="text-red-400 hover:text-red-300 transition-colors font-medium">Cancel Reservation</button>
-                    </form>
-                </div>
+            <div class="pt-6 border-t border-zinc-800 flex justify-end gap-4">
+                <a href="{{ route('reservations.edit', $reservation) }}" class="text-zinc-400 hover:text-white transition-colors font-medium">Edit</a>
+                <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" onsubmit="return confirm('Cancel this reservation?')" class="inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-red-400 hover:text-red-300 transition-colors font-medium">Cancel Reservation</button>
+                </form>
+            </div>
             @endif
         </div>
     </div>

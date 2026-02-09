@@ -6,9 +6,10 @@ use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ParkingSpotController;
 
+
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -16,26 +17,27 @@ Route::get('/dashboard', function () {
 
 Route::get('/login', function () {
     return view('auth.login');
-})->name('login');
+})->middleware('guest')->name('login');
 
 Route::get('/register', function () {
     return view('auth.register');
-})->name('register');
+})->middleware('guest')->name('register');
 
 // Dashboard routes with authentication logic
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // User routes
     Route::middleware(['user'])->group(function () {
         Route::get('/dashboard/user', [DashboardController::class, 'user'])->name('dashboard.user');
         Route::resource('vehicles', VehicleController::class);
         Route::resource('reservations', ReservationController::class);
     });
-    
+
     // Admin routes
     Route::middleware(['admin'])->group(function () {
         Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
+        Route::resource('parkingSpots', ParkingSpotController::class);
         Route::get('/dashboard/admin/parking-spots', [ParkingSpotController::class, 'index'])->name('admin.parking-spots');
         Route::get('/dashboard/admin/reservations', [ReservationController::class, 'adminIndex'])->name('admin.reservations');
     });

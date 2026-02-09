@@ -24,49 +24,50 @@
                     </thead>
                     <tbody class="divide-y divide-zinc-800">
                         @forelse ($reservations as $reservation)
-                            <tr class="hover:bg-zinc-800/50 transition-colors">
-                                <td class="px-6 py-4">
-                                    <div class="font-medium text-white">{{ $reservation->vehicle->license_plate }}</div>
-                                    <div class="text-xs">{{ $reservation->vehicle->brand }} {{ $reservation->vehicle->model }}</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="font-mono text-white">{{ $reservation->parkingSpot->spot_number ?? 'N/A' }}</span>
-                                    <span class="text-xs block">Level {{ $reservation->parkingSpot->level ?? '-' }}</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-white">{{ $reservation->start_time->format('M d, Y') }}</div>
-                                    <div class="text-xs">{{ $reservation->start_time->format('H:i') }} - {{ $reservation->end_time->format('H:i') }}</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    @php
-                                        $statusClasses = [
-                                            'pending' => 'bg-yellow-900/30 text-yellow-400 border-yellow-900',
-                                            'confirmed' => 'bg-green-900/30 text-green-400 border-green-900',
-                                            'checked_in' => 'bg-blue-900/30 text-blue-400 border-blue-900',
-                                            'checked_out' => 'bg-zinc-800 text-zinc-400 border-zinc-700',
-                                            'cancelled' => 'bg-red-900/30 text-red-400 border-red-900',
-                                        ];
-                                    @endphp
-                                    <span class="px-2 py-1 rounded text-xs border {{ $statusClasses[$reservation->status] ?? 'bg-zinc-800 text-zinc-400 border-zinc-700' }}">
-                                        {{ ucfirst(str_replace('_', ' ', $reservation->status)) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-right flex justify-end gap-3">
-                                    @if($reservation->status === 'pending' || $reservation->status === 'confirmed')
-                                        <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" onsubmit="return confirm('Cancel this reservation?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-400 hover:text-red-300 transition-colors">Cancel</button>
-                                        </form>
-                                    @endif
-                                </td>
-                            </tr>
+                        <tr class="hover:bg-zinc-800/50 transition-colors cursor-pointer" onclick="if(event.target.closest('form') === null) { window.location.href = '{{ route('reservations.show', $reservation) }}'; }">
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-white">{{ $reservation->vehicle->license_plate }}</div>
+                                <div class="text-xs">{{ $reservation->vehicle->brand }} {{ $reservation->vehicle->model }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="font-mono text-white">{{ $reservation->parkingSpot->spot_number ?? 'N/A' }}</span>
+                                <span class="text-xs block text-zinc-500">{{ $reservation->parkingSpot->zone->name ?? 'N/A' }}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-white">{{ $reservation->start_time->format('M d, Y') }}</div>
+                                <div class="text-xs">{{ $reservation->start_time->format('H:i') }} - {{ $reservation->end_time->format('H:i') }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                @php
+                                $statusClasses = [
+                                'pending' => 'bg-yellow-900/30 text-yellow-400 border-yellow-900',
+                                'confirmed' => 'bg-green-900/30 text-green-400 border-green-900',
+                                'checked_in' => 'bg-blue-900/30 text-blue-400 border-blue-900',
+                                'checked_out' => 'bg-zinc-800 text-zinc-400 border-zinc-700',
+                                'cancelled' => 'bg-red-900/30 text-red-400 border-red-900',
+                                ];
+                                @endphp
+                                <span class="px-2 py-1 rounded text-xs border {{ $statusClasses[$reservation->status] ?? 'bg-zinc-800 text-zinc-400 border-zinc-700' }}">
+                                    {{ ucfirst(str_replace('_', ' ', $reservation->status)) }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-right flex justify-end gap-3" onclick="event.stopPropagation();">
+                                @if($reservation->status === 'pending' || $reservation->status === 'confirmed')
+                                <a href="{{ route('reservations.edit', $reservation) }}" class="text-zinc-400 hover:text-white transition-colors text-sm">Edit</a>
+                                <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" onsubmit="return confirm('Cancel this reservation?')" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-400 hover:text-red-300 transition-colors text-sm">Cancel</button>
+                                </form>
+                                @endif
+                            </td>
+                        </tr>
                         @empty
-                            <tr>
-                                <td colspan="5" class="px-6 py-12 text-center text-zinc-500">
-                                    No reservations found.
-                                </td>
-                            </tr>
+                        <tr>
+                            <td colspan="5" class="px-6 py-12 text-center text-zinc-500">
+                                No reservations found.
+                            </td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>

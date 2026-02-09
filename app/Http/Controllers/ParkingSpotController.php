@@ -30,9 +30,10 @@ class ParkingSpotController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'spot_number' => 'required|string|max:10|unique:parking_spots,spot_number',
-            'level' => 'required|integer',
-            'is_reserved' => 'required|boolean',
+            'zone_id' => 'required|exists:zones,id',
+            'spot_number' => 'required|string|max:10',
+            'type' => 'required|in:regular,electric,handicap',
+            'is_active' => 'required|boolean',
         ]);
 
         $parkingSpot = ParkingSpot::create($validated);
@@ -62,9 +63,10 @@ class ParkingSpotController extends Controller
     public function update(Request $request, ParkingSpot $parkingSpot)
     {
         $validated = $request->validate([
-            'spot_number' => 'required|string|max:10|unique:parking_spots,spot_number,' . $parkingSpot->id,
-            'level' => 'required|integer',
-            'is_reserved' => 'required|boolean',
+            'zone_id' => 'required|exists:zones,id',
+            'spot_number' => 'required|string|max:10',
+            'type' => 'required|in:regular,electric,handicap',
+            'is_active' => 'required|boolean',
         ]);
 
         $parkingSpot->update($validated);

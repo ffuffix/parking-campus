@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database ERD</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .mermaid { text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>Application Entity Relationship Diagram</h1>
+    <div class="mermaid">
+erDiagram
+    parking_spots {
+        integer id
+        integer zone_id
+        varchar spot_number
+        varchar type
+        tinyint is_active
+        datetime created_at
+        datetime updated_at
+    }
+    personal_access_tokens {
+        integer id
+        varchar tokenable_type
+        integer tokenable_id
+        text name
+        varchar token
+        text abilities
+        datetime last_used_at
+        datetime expires_at
+        datetime created_at
+        datetime updated_at
+    }
+    reservations {
+        integer id
+        integer user_id
+        integer vehicle_id
+        integer parking_spot_id
+        datetime start_time
+        datetime end_time
+        varchar status
+        datetime checked_in_at
+        datetime checked_out_at
+        datetime created_at
+        datetime updated_at
+    }
+    users {
+        integer id
+        varchar name
+        varchar role
+        varchar email
+        datetime email_verified_at
+        varchar password
+        varchar remember_token
+        datetime created_at
+        datetime updated_at
+    }
+    vehicles {
+        integer id
+        varchar brand
+        varchar model
+        varchar vin
+        varchar color
+        integer year
+        varchar license_plate
+        varchar type
+        integer user_id
+        datetime created_at
+        datetime updated_at
+    }
+    zones {
+        integer id
+        varchar name
+        varchar description
+        integer max_spots
+        datetime created_at
+        datetime updated_at
+    }
+    zones ||--o{ parking_spots : "zone_id"
+    parking_spots ||--o{ reservations : "parking_spot_id"
+    vehicles ||--o{ reservations : "vehicle_id"
+    users ||--o{ reservations : "user_id"
+    users ||--o{ vehicles : "user_id"
+
+    </div>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose',
+        });
+    </script>
+</body>
+</html>

@@ -32,7 +32,7 @@
                     <h3 class="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-2">Color</h3>
                     <div class="flex items-center gap-2">
                         @if($vehicle->color)
-                            <span class="w-4 h-4 rounded-full border border-zinc-700" style="background-color: {{ $vehicle->color }}"></span>
+                        <span class="w-4 h-4 rounded-full border border-zinc-700" style="background-color: {{ $vehicle->color }}"></span>
                         @endif
                         <p class="text-white">{{ ucfirst($vehicle->color) ?? 'N/A' }}</p>
                     </div>

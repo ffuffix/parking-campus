@@ -23,36 +23,42 @@
                     </thead>
                     <tbody class="divide-y divide-zinc-800">
                         @forelse ($reservations as $reservation)
-                            <tr class="hover:bg-zinc-800/50 transition-colors">
-                                <td class="px-6 py-4 text-white font-medium">{{ $reservation->user->name }}</td>
-                                <td class="px-6 py-4">
-                                    <div class="text-white">{{ $reservation->vehicle->license_plate }}</div>
-                                    <div class="text-xs">{{ $reservation->vehicle->brand }}</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="font-mono text-white">{{ $reservation->parkingSpot->spot_number ?? 'N/A' }}</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-white">{{ $reservation->start_time->format('M d') }}</div>
-                                    <div class="text-xs">{{ $reservation->start_time->format('H:i') }} - {{ $reservation->end_time->format('H:i') }}</div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="px-2 py-1 rounded text-xs border {{ $reservation->status === 'cancelled' ? 'bg-red-900/30 text-red-400 border-red-900' : 'bg-green-900/30 text-green-400 border-green-900' }}">
-                                        {{ ucfirst($reservation->status) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" onsubmit="return confirm('Cancel this reservation?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-400 hover:text-red-300 transition-colors">Cancel</button>
-                                    </form>
-                                </td>
-                            </tr>
+                        <tr class="hover:bg-zinc-800/50 transition-colors cursor-pointer" onclick="if(event.target.closest('form') === null && event.target.closest('button') === null) { window.location.href = '{{ route('parkingSpots.show', $reservation->parkingSpot) }}'; }">
+                            <td class="px-6 py-4 text-white font-medium">{{ $reservation->user->name }}</td>
+                            <td class="px-6 py-4">
+                                <div class="text-white">{{ $reservation->vehicle->license_plate }}</div>
+                                <div class="text-xs">{{ $reservation->vehicle->brand }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                @if($reservation->parkingSpot)
+                                <span class="font-mono text-white">
+                                    {{ $reservation->parkingSpot->spot_number }}
+                                </span>
+                                @else
+                                <span class="font-mono text-white">N/A</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-white">{{ $reservation->start_time->format('M d') }}</div>
+                                <div class="text-xs">{{ $reservation->start_time->format('H:i') }} - {{ $reservation->end_time->format('H:i') }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded text-xs border {{ $reservation->status === 'cancelled' ? 'bg-red-900/30 text-red-400 border-red-900' : 'bg-green-900/30 text-green-400 border-green-900' }}">
+                                    {{ ucfirst($reservation->status) }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-right" onclick="event.stopPropagation();">
+                                <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" onsubmit="return confirm('Cancel this reservation?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-400 hover:text-red-300 transition-colors">Cancel</button>
+                                </form>
+                            </td>
+                        </tr>
                         @empty
-                            <tr>
-                                <td colspan="6" class="px-6 py-12 text-center text-zinc-500">No reservations found.</td>
-                            </tr>
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center text-zinc-500">No reservations found.</td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>

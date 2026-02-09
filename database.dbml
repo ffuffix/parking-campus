@@ -1,0 +1,77 @@
+Table parking_spots {
+  id integer [primary key]
+  zone_id integer
+  spot_number varchar
+  type varchar
+  is_active tinyint
+  created_at datetime
+  updated_at datetime
+}
+
+Table personal_access_tokens {
+  id integer [primary key]
+  tokenable_type varchar
+  tokenable_id integer
+  name text
+  token varchar
+  abilities text
+  last_used_at datetime
+  expires_at datetime
+  created_at datetime
+  updated_at datetime
+}
+
+Table reservations {
+  id integer [primary key]
+  user_id integer
+  vehicle_id integer
+  parking_spot_id integer
+  start_time datetime
+  end_time datetime
+  status varchar
+  checked_in_at datetime
+  checked_out_at datetime
+  created_at datetime
+  updated_at datetime
+}
+
+Table users {
+  id integer [primary key]
+  name varchar
+  role varchar
+  email varchar
+  email_verified_at datetime
+  password varchar
+  remember_token varchar
+  created_at datetime
+  updated_at datetime
+}
+
+Table vehicles {
+  id integer [primary key]
+  brand varchar
+  model varchar
+  vin varchar
+  color varchar
+  year integer
+  license_plate varchar
+  type varchar
+  user_id integer
+  created_at datetime
+  updated_at datetime
+}
+
+Table zones {
+  id integer [primary key]
+  name varchar
+  description varchar
+  max_spots integer
+  created_at datetime
+  updated_at datetime
+}
+
+Ref: parking_spots.zone_id > zones.id
+Ref: reservations.parking_spot_id > parking_spots.id
+Ref: reservations.vehicle_id > vehicles.id
+Ref: reservations.user_id > users.id
+Ref: vehicles.user_id > users.id

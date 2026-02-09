@@ -15,14 +15,14 @@
                     <select name="vehicle_id" id="vehicle_id" class="w-full bg-black border border-zinc-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-colors" required>
                         <option value="" disabled selected>Choose a vehicle...</option>
                         @foreach($vehicles as $vehicle)
-                            <option value="{{ $vehicle->id }}" {{ old('vehicle_id') == $vehicle->id ? 'selected' : '' }}>
-                                {{ $vehicle->license_plate }} ({{ $vehicle->brand }} {{ $vehicle->model }})
-                            </option>
+                        <option value="{{ $vehicle->id }}" {{ old('vehicle_id') == $vehicle->id ? 'selected' : '' }}>
+                            {{ $vehicle->license_plate }} ({{ $vehicle->brand }} {{ $vehicle->model }})
+                        </option>
                         @endforeach
                     </select>
                     @error('vehicle_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                     @if($vehicles->isEmpty())
-                        <p class="text-xs text-yellow-500 mt-1">You need to <a href="{{ route('vehicles.create') }}" class="underline">add a vehicle</a> first.</p>
+                    <p class="text-xs text-yellow-500 mt-1">You need to <a href="{{ route('vehicles.create') }}" class="underline">add a vehicle</a> first.</p>
                     @endif
                 </div>
 
@@ -32,9 +32,9 @@
                     <select name="parking_spot_id" id="parking_spot_id" class="w-full bg-black border border-zinc-800 rounded-md py-2 px-3 text-white focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-colors" required>
                         <option value="" disabled selected>Choose a spot...</option>
                         @foreach($parkingSpots as $spot)
-                            <option value="{{ $spot->id }}" {{ old('parking_spot_id') == $spot->id ? 'selected' : '' }}>
-                                Spot {{ $spot->spot_number }} (Level {{ $spot->level }}) - {{ $spot->description ?? 'Standard Spot' }}
-                            </option>
+                        <option value="{{ $spot->id }}" {{ old('parking_spot_id') == $spot->id ? 'selected' : '' }}>
+                            Spot {{ $spot->spot_number }} - {{ ucfirst($spot->type) }} ({{ $spot->zone->name ?? 'Zone' }})
+                        </option>
                         @endforeach
                     </select>
                     @error('parking_spot_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
