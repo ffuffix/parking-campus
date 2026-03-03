@@ -39,17 +39,17 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('password'),
         ]);
 
-        // Create zones
+        // Create zones (coordinates around Haarlem campus)
         $zones = [
-            ['name' => 'Visitors', 'description' => 'Parking zone for visitors', 'max_spots' => 20],
-            ['name' => 'Staff', 'description' => 'Parking zone for staff members', 'max_spots' => 30],
-            ['name' => 'Electric', 'description' => 'Parking zone with EV charging stations', 'max_spots' => 10],
-            ['name' => 'Students', 'description' => 'Parking zone for students', 'max_spots' => 50],
+            ['name' => 'Visitors', 'description' => 'Parking zone for visitors', 'max_spots' => 20, 'latitude' => 52.3812, 'longitude' => 4.6335],
+            ['name' => 'Staff', 'description' => 'Parking zone for staff members', 'max_spots' => 30, 'latitude' => 52.3822, 'longitude' => 4.6360],
+            ['name' => 'Electric', 'description' => 'Parking zone with EV charging stations', 'max_spots' => 10, 'latitude' => 52.3805, 'longitude' => 4.6385],
+            ['name' => 'Students', 'description' => 'Parking zone for students', 'max_spots' => 50, 'latitude' => 52.3818, 'longitude' => 4.6405],
         ];
 
         foreach ($zones as $zoneData) {
             $zone = Zone::create($zoneData);
-            
+
             // Create parking spots for each zone
             $prefix = strtoupper(substr($zone->name, 0, 1));
             for ($i = 1; $i <= $zone->max_spots; $i++) {

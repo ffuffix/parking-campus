@@ -18,6 +18,11 @@ return [
         'base_url' => env('CAR_API_BASE_URL', 'https://myfakeapi.com'),
     ],
 
+        'map_api' => [
+        'base_url' => env('MAP_API_BASE_URL', 'https://www.openstreetmap.org/'),
+        'api_key' => env('MAP_API_KEY'),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

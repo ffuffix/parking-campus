@@ -13,10 +13,14 @@ class Zone extends Model
         'name',
         'description',
         'max_spots',
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [
         'max_spots' => 'integer',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     public function parkingspots()
@@ -48,16 +52,18 @@ class Zone extends Model
     // get the number of available spots in this zone
     public function get_available_spots_count_attribute(): int
     {
-        return $this->active_spots_count - $this->occupied_spots_count;
+        return $this->get_active_spots_count_attribute() - $this->get_occupied_spots_count_attribute();
     }
 
     // returns the occupancy percentage of the zone
     public function get_occupancy_percentage_attribute(): float
     {
-        if ($this->active_spots_count === 0) {
+        $active = $this->get_active_spots_count_attribute();
+
+        if ($active === 0) {
             return 0;
         }
 
-        return round(($this->occupied_spots_count / $this->active_spots_count) * 100, 1);
+        return round(($this->get_occupied_spots_count_attribute() / $active) * 100, 1);
     }
 }

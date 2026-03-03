@@ -28,7 +28,8 @@
                         <a href="/" class="flex items-center gap-2">
                             <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                                 <svg class="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
                                 </svg>
                             </div>
                             <span class="font-bold text-white tracking-tight">CampusPark</span>
@@ -38,15 +39,22 @@
                     <!-- Navigation Links -->
                     <nav class="flex items-center space-x-6">
                         <a href="/" class="text-sm text-zinc-400 hover:text-white transition-colors">Home</a>
+                        <a href="{{ route('map') }}"
+                            class="text-sm text-zinc-400 hover:text-white transition-colors">Map</a>
                         @auth
-                        <a href="{{ route('dashboard') }}" class="text-sm bg-white text-black px-4 py-2 rounded-full font-medium hover:bg-zinc-200 transition-colors">Dashboard</a>
-                        <form method="POST" action="{{ route('logout') }}" class="inline">
-                            @csrf
-                            <button type="submit" class="text-sm text-zinc-400 hover:text-white transition-colors">Logout</button>
-                        </form>
+                            <a href="{{ route('dashboard') }}"
+                                class="text-sm bg-white text-black px-4 py-2 rounded-full font-medium hover:bg-zinc-200 transition-colors">Dashboard</a>
+                            <form method="POST" action="{{ route('logout') }}" class="inline">
+                                @csrf
+                                <button type="submit"
+                                    class="text-sm text-zinc-400 hover:text-white transition-colors">Logout</button>
+                            </form>
                         @else
-                        <a href="{{ route('login') }}" class="text-sm text-zinc-400 hover:text-white transition-colors">Login</a>
-                        <a href="{{ route('register') }}" class="text-sm bg-white text-black px-4 py-2 rounded-full font-medium hover:bg-zinc-200 transition-colors">Sign Up</a>
+                            <a href="{{ route('login') }}"
+                                class="text-sm text-zinc-400 hover:text-white transition-colors">Login</a>
+                            <a href="{{ route('register') }}"
+                                class="text-sm bg-white text-black px-4 py-2 rounded-full font-medium hover:bg-zinc-200 transition-colors">Sign
+                                Up</a>
                         @endauth
                     </nav>
                 </div>
@@ -55,13 +63,13 @@
 
         <!-- Page Content -->
         @if(isset($fullWidth))
-        <main class="flex-grow">
-            {{ $slot }}
-        </main>
+            <main class="flex-grow">
+                {{ $slot }}
+            </main>
         @else
-        <main class="flex-grow py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-            {{ $slot }}
-        </main>
+            <main class="flex-grow py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+                {{ $slot }}
+            </main>
         @endif
 
         <!-- Footer -->

@@ -39,7 +39,7 @@ class DashboardController extends Controller
 
     public function admin()
     {
-        $stats = [
+        $stats = [ 
             'totalSpots' => \App\Models\ParkingSpot::count(),
             'availableSpots' => \App\Models\ParkingSpot::where('is_active', true)
                 ->whereDoesntHave('reservations', function ($query) {

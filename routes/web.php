@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\ParkingSpotController;
+use App\Http\Controllers\MapController;
 
 
 Route::get('/', function () {
@@ -42,5 +43,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard/admin/reservations', [ReservationController::class, 'adminIndex'])->name('admin.reservations');
     });
 });
+
+Route::get('/map', [MapController::class, 'index'])->name('map');
 
 require __DIR__ . '/auth.php';
