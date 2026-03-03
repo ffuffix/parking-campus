@@ -31,8 +31,7 @@ class ReservationController extends Controller
     public function create()
     {
         $vehicles = auth()->user()->vehicles;
-        $parkingSpots = \App\Models\ParkingSpot::where('is_active', true)->get();
-        return view('reservations.create', compact('vehicles', 'parkingSpots'));
+        return view('reservations.create', compact('vehicles'));
     }
 
     /**
@@ -51,6 +50,17 @@ class ReservationController extends Controller
         $vehicle = \App\Models\Vehicle::findOrFail($validated['vehicle_id']);
         if ($vehicle->user_id !== auth()->id()) {
             abort(403, 'Unauthorized vehicle selection.');
+        }
+
+        // Verify parking spot is available for the selected time range
+        $parkingSpot = \App\Models\ParkingSpot::findOrFail($validated['parking_spot_id']);
+        $startTime = new \DateTime($validated['start_time']);
+        $endTime = new \DateTime($validated['end_time']);
+
+        if (!$parkingSpot->is_available($startTime, $endTime)) {
+            return back()->withErrors([
+                'parking_spot_id' => 'This parking spot is already reserved for the selected time range.',
+            ])->withInput();
         }
 
         $request->user()->reservations()->create($validated);
@@ -107,7 +117,7 @@ class ReservationController extends Controller
         if ($reservation->user_id !== auth()->id() && !auth()->user()->is_admin) {
             abort(403);
         }
-        
+
         $reservation->delete();
 
         return redirect()->route('reservations.index')->with('success', 'Reservation cancelled.');
