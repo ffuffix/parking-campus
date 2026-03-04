@@ -22,10 +22,12 @@ class DashboardController extends Controller
     public function user()
     {
         $user = Auth::user();
-        $vehicles = $user->vehicles()->with(['reservations' => function ($query) {
-            $query->whereNotIn('status', ['cancelled', 'checked_out'])
-                ->orderBy('start_time', 'desc');
-        }])->get();
+        $vehicles = $user->vehicles()->with([
+            'reservations' => function ($query) {
+                $query->whereNotIn('status', ['cancelled', 'checked_out'])
+                    ->orderBy('start_time', 'desc');
+            }
+        ])->get();
 
         $upcomingReservations = $user->reservations()
             ->whereNotIn('status', ['cancelled', 'checked_out'])
@@ -40,7 +42,7 @@ class DashboardController extends Controller
 
     public function admin()
     {
-        $stats = [ 
+        $stats = [
             'totalSpots' => \App\Models\ParkingSpot::count(),
             'availableSpots' => \App\Models\ParkingSpot::where('is_active', true)
                 ->whereDoesntHave('reservations', function ($query) {
@@ -60,9 +62,11 @@ class DashboardController extends Controller
         ];
 
         // Per-zone occupancy stats
-        $zones = \App\Models\Zone::withCount(['parkingspots as active_spots_count' => function ($query) {
-            $query->where('is_active', true);
-        }])->get();
+        $zones = \App\Models\Zone::withCount([
+            'parkingspots as active_spots_count' => function ($query) {
+                $query->where('is_active', true);
+            }
+        ])->get();
 
         $zoneStats = $zones->map(function ($zone) {
             $occupied = $zone->get_occupied_spots_count_attribute();
@@ -128,8 +132,14 @@ class DashboardController extends Controller
             ->get();
 
         return view('dashboard-admin.index', compact(
-            'stats', 'zones', 'zoneStats', 'allTimeSlots', 'maxSlotCount',
-            'dayStats', 'maxDayCount', 'recentReservations'
+            'stats',
+            'zones',
+            'zoneStats',
+            'allTimeSlots',
+            'maxSlotCount',
+            'dayStats',
+            'maxDayCount',
+            'recentReservations'
         ));
     }
 

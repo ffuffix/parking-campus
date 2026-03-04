@@ -18,9 +18,12 @@ class ReservationController extends Controller
         // Fetch weather for upcoming reservations (next 7 days)
         $weatherWarnings = [];
         foreach ($reservations as $reservation) {
-            if (in_array($reservation->status, ['cancelled', 'checked_out'])) continue;
-            if ($reservation->start_time->isPast()) continue;
-            if ($reservation->start_time->diffInDays(now()) > 7) continue;
+            if (in_array($reservation->status, ['cancelled', 'checked_out']))
+                continue;
+            if ($reservation->start_time->isPast())
+                continue;
+            if ($reservation->start_time->diffInDays(now()) > 7)
+                continue;
 
             $forecast = $weatherAPI->get_forecast($reservation->start_time->format('Y-m-d'));
             if ($forecast && !empty($forecast['daily'])) {
@@ -100,7 +103,8 @@ class ReservationController extends Controller
 
         // Fetch weather if reservation is upcoming (within 7 days)
         $weather = null;
-        if (!in_array($reservation->status, ['cancelled', 'checked_out'])
+        if (
+            !in_array($reservation->status, ['cancelled', 'checked_out'])
             && $reservation->start_time->isFuture()
             && $reservation->start_time->diffInDays(now()) <= 7
         ) {

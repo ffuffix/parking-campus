@@ -13,19 +13,22 @@
         <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-6 space-y-8">
             <div class="flex justify-between items-start">
                 <div>
-                    <h3 class="text-lg font-bold text-white mb-1">Spot {{ $reservation->parkingSpot->spot_number ?? 'N/A' }}</h3>
-                    <p class="text-zinc-400">{{ $reservation->parkingSpot->zone->name ?? 'N/A' }} - {{ ucfirst($reservation->parkingSpot->type ?? '') }}</p>
+                    <h3 class="text-lg font-bold text-white mb-1">Spot
+                        {{ $reservation->parkingSpot->spot_number ?? 'N/A' }}</h3>
+                    <p class="text-zinc-400">{{ $reservation->parkingSpot->zone->name ?? 'N/A' }} -
+                        {{ ucfirst($reservation->parkingSpot->type ?? '') }}</p>
                 </div>
                 @php
-                $statusClasses = [
-                'pending' => 'bg-yellow-900/30 text-yellow-400 border-yellow-900',
-                'confirmed' => 'bg-green-900/30 text-green-400 border-green-900',
-                'checked_in' => 'bg-blue-900/30 text-blue-400 border-blue-900',
-                'checked_out' => 'bg-zinc-800 text-zinc-400 border-zinc-700',
-                'cancelled' => 'bg-red-900/30 text-red-400 border-red-900',
-                ];
+                    $statusClasses = [
+                        'pending' => 'bg-yellow-900/30 text-yellow-400 border-yellow-900',
+                        'confirmed' => 'bg-green-900/30 text-green-400 border-green-900',
+                        'checked_in' => 'bg-blue-900/30 text-blue-400 border-blue-900',
+                        'checked_out' => 'bg-zinc-800 text-zinc-400 border-zinc-700',
+                        'cancelled' => 'bg-red-900/30 text-red-400 border-red-900',
+                    ];
                 @endphp
-                <span class="px-3 py-1 rounded-full text-sm border {{ $statusClasses[$reservation->status] ?? 'bg-zinc-800 text-zinc-400 border-zinc-700' }}">
+                <span
+                    class="px-3 py-1 rounded-full text-sm border {{ $statusClasses[$reservation->status] ?? 'bg-zinc-800 text-zinc-400 border-zinc-700' }}">
                     {{ ucfirst(str_replace('_', ' ', $reservation->status)) }}
                 </span>
             </div>
@@ -46,12 +49,15 @@
                 <div class="flex items-center gap-4">
                     <div class="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center">
                         <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 012-2v0m12 0a2 2 0 012 2v0m-6 0a2 2 0 012-2v0" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 012-2v0m12 0a2 2 0 012 2v0m-6 0a2 2 0 012-2v0" />
                         </svg>
                     </div>
                     <div>
-                        <p class="text-white font-medium">{{ $reservation->vehicle->brand }} {{ $reservation->vehicle->model }}</p>
+                        <p class="text-white font-medium">{{ $reservation->vehicle->brand }}
+                            {{ $reservation->vehicle->model }}</p>
                         <p class="text-zinc-500 font-mono text-sm">{{ $reservation->vehicle->license_plate }}</p>
                     </div>
                 </div>
@@ -62,7 +68,7 @@
                 @php
                     $daily = $weather['daily'];
                     $badWeather = $daily['precipitation_probability'] > 50
-                        || in_array($daily['weather_code'], [65,66,67,71,73,75,77,80,81,82,85,86,95,96,99]);
+                        || in_array($daily['weather_code'], [65, 66, 67, 71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96, 99]);
                 @endphp
                 <div class="pt-6 border-t border-zinc-800">
                     <h3 class="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-3">Weather Forecast</h3>
@@ -73,7 +79,8 @@
                                 <span class="text-3xl">{{ $daily['icon'] }}</span>
                                 <div>
                                     <p class="text-white font-medium">{{ $daily['description'] }}</p>
-                                    <p class="text-zinc-500 text-xs">{{ $reservation->start_time->translatedFormat('l j F') }}</p>
+                                    <p class="text-zinc-500 text-xs">
+                                        {{ $reservation->start_time->translatedFormat('l j F') }}</p>
                                 </div>
                             </div>
                             <div class="text-right">
@@ -99,12 +106,16 @@
                         </div>
 
                         @if($badWeather)
-                            <div class="mt-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 flex items-start gap-2">
-                                <svg class="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            <div
+                                class="mt-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 flex items-start gap-2">
+                                <svg class="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                                 </svg>
                                 <p class="text-yellow-500 text-xs">
-                                    <strong>Bad weather expected!</strong> Rain, snow or storms are forecast for this day. Consider switching to a covered parking spot to protect your vehicle.
+                                    <strong>Bad weather expected!</strong> Rain, snow or storms are forecast for this day.
+                                    Consider switching to a covered parking spot to protect your vehicle.
                                 </p>
                             </div>
                         @endif
@@ -113,14 +124,17 @@
             @endif
 
             @if($reservation->status === 'pending' || $reservation->status === 'confirmed')
-            <div class="pt-6 border-t border-zinc-800 flex justify-end gap-4">
-                <a href="{{ route('reservations.edit', $reservation) }}" class="text-zinc-400 hover:text-white transition-colors font-medium">Edit</a>
-                <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" onsubmit="return confirm('Cancel this reservation?')" class="inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="text-red-400 hover:text-red-300 transition-colors font-medium">Cancel Reservation</button>
-                </form>
-            </div>
+                <div class="pt-6 border-t border-zinc-800 flex justify-end gap-4">
+                    <a href="{{ route('reservations.edit', $reservation) }}"
+                        class="text-zinc-400 hover:text-white transition-colors font-medium">Edit</a>
+                    <form action="{{ route('reservations.destroy', $reservation) }}" method="POST"
+                        onsubmit="return confirm('Cancel this reservation?')" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-red-400 hover:text-red-300 transition-colors font-medium">Cancel
+                            Reservation</button>
+                    </form>
+                </div>
             @endif
         </div>
     </div>

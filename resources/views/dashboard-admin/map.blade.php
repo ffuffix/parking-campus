@@ -11,22 +11,26 @@
         <div id="map" class="w-full" style="height: calc(100vh - 64px - 73px);"></div>
 
         <!-- Admin Controls Panel -->
-        <div class="absolute top-4 right-4 z-[1000] bg-black/90 backdrop-blur-xl border border-zinc-800 rounded-xl p-4 w-[300px]">
+        <div
+            class="absolute top-4 right-4 z-[1000] bg-black/90 backdrop-blur-xl border border-zinc-800 rounded-xl p-4 w-[300px]">
             <h3 class="text-white font-semibold text-sm mb-3">Admin: Manage Spots</h3>
 
             <!-- Mode Toggle -->
             <div class="flex gap-2 mb-4">
-                <button onclick="setMode('view')" id="btn-view" class="flex-1 text-xs py-1.5 px-3 rounded-lg bg-white text-black font-medium transition-colors">
+                <button onclick="setMode('view')" id="btn-view"
+                    class="flex-1 text-xs py-1.5 px-3 rounded-lg bg-white text-black font-medium transition-colors">
                     View
                 </button>
-                <button onclick="setMode('add')" id="btn-add" class="flex-1 text-xs py-1.5 px-3 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-zinc-700 transition-colors">
+                <button onclick="setMode('add')" id="btn-add"
+                    class="flex-1 text-xs py-1.5 px-3 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-zinc-700 transition-colors">
                     + Add Spot
                 </button>
             </div>
 
             <!-- Add Spot Form (hidden by default) -->
             <div id="add-spot-form" class="hidden space-y-3">
-                <p class="text-zinc-400 text-xs">Click on the map to set the location, then fill in the details below.</p>
+                <p class="text-zinc-400 text-xs">Click on the map to set the location, then fill in the details below.
+                </p>
 
                 <div id="coords-display" class="text-xs text-zinc-500 bg-zinc-900 rounded px-2 py-1.5 font-mono hidden">
                     Lat: <span id="coord-lat">—</span>, Lng: <span id="coord-lng">—</span>
@@ -34,7 +38,8 @@
 
                 <div>
                     <label class="block text-xs text-zinc-400 mb-1">Zone</label>
-                    <select id="new-zone" class="w-full bg-zinc-900 border border-zinc-700 rounded-md py-1.5 px-2 text-white text-sm focus:outline-none focus:border-white">
+                    <select id="new-zone"
+                        class="w-full bg-zinc-900 border border-zinc-700 rounded-md py-1.5 px-2 text-white text-sm focus:outline-none focus:border-white">
                         @foreach($zones as $zone)
                             <option value="{{ $zone->id }}">{{ $zone->name }}</option>
                         @endforeach
@@ -43,12 +48,14 @@
 
                 <div>
                     <label class="block text-xs text-zinc-400 mb-1">Spot Number</label>
-                    <input type="text" id="new-spot-number" placeholder="e.g. A-01" class="w-full bg-zinc-900 border border-zinc-700 rounded-md py-1.5 px-2 text-white text-sm focus:outline-none focus:border-white">
+                    <input type="text" id="new-spot-number" placeholder="e.g. A-01"
+                        class="w-full bg-zinc-900 border border-zinc-700 rounded-md py-1.5 px-2 text-white text-sm focus:outline-none focus:border-white">
                 </div>
 
                 <div>
                     <label class="block text-xs text-zinc-400 mb-1">Type</label>
-                    <select id="new-type" class="w-full bg-zinc-900 border border-zinc-700 rounded-md py-1.5 px-2 text-white text-sm focus:outline-none focus:border-white">
+                    <select id="new-type"
+                        class="w-full bg-zinc-900 border border-zinc-700 rounded-md py-1.5 px-2 text-white text-sm focus:outline-none focus:border-white">
                         <option value="regular">Regular</option>
                         <option value="electric">Electric</option>
                         <option value="handicap">Handicap</option>
@@ -58,7 +65,9 @@
                 <div id="add-spot-error" class="hidden text-red-400 text-xs"></div>
                 <div id="add-spot-success" class="hidden text-green-400 text-xs"></div>
 
-                <button onclick="createSpot()" id="create-spot-btn" class="w-full text-sm bg-white text-black py-2 rounded-lg font-medium hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                <button onclick="createSpot()" id="create-spot-btn"
+                    class="w-full text-sm bg-white text-black py-2 rounded-lg font-medium hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled>
                     Create Parking Spot
                 </button>
             </div>
@@ -67,22 +76,22 @@
             <div id="zone-legend" class="space-y-2 mt-4 pt-4 border-t border-zinc-800">
                 <p class="text-zinc-500 text-xs uppercase font-medium mb-2">Zones</p>
                 @foreach($mapData['zones'] as $zone)
-                    <div class="flex items-center justify-between gap-3">
-                        <div class="flex items-center gap-2">
-                            <span class="w-3 h-3 rounded-full inline-block"
-                                style="background-color: {{ match($zone['name']) {
-                                    'Visitors' => '#3b82f6',
-                                    'Staff' => '#10b981',
-                                    'Electric' => '#f59e0b',
-                                    'Students' => '#8b5cf6',
-                                    default => '#6b7280'
-                                } }};"></span>
-                            <span class="text-zinc-300 text-sm">{{ $zone['name'] }}</span>
-                        </div>
-                        <span class="text-xs font-mono {{ $zone['available_spots'] > 0 ? 'text-green-400' : 'text-red-400' }}">
-                            {{ $zone['available_spots'] }}/{{ $zone['max_spots'] }}
-                        </span>
-                    </div>
+                                <div class="flex items-center justify-between gap-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-3 h-3 rounded-full inline-block" style="background-color: {{ match ($zone['name']) {
+                        'Visitors' => '#3b82f6',
+                        'Staff' => '#10b981',
+                        'Electric' => '#f59e0b',
+                        'Students' => '#8b5cf6',
+                        default => '#6b7280'
+                    } }};"></span>
+                                        <span class="text-zinc-300 text-sm">{{ $zone['name'] }}</span>
+                                    </div>
+                                    <span
+                                        class="text-xs font-mono {{ $zone['available_spots'] > 0 ? 'text-green-400' : 'text-red-400' }}">
+                                        {{ $zone['available_spots'] }}/{{ $zone['max_spots'] }}
+                                    </span>
+                                </div>
                 @endforeach
             </div>
         </div>

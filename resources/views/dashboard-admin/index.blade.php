@@ -43,13 +43,15 @@
                     <div>
                         <div class="flex justify-between items-center mb-1">
                             <span class="text-sm text-white font-medium">{{ $zone['name'] }}</span>
-                            <span class="text-xs font-mono {{ $zone['available'] > 0 ? 'text-green-400' : 'text-red-400' }}">
-                                {{ $zone['occupied'] }} / {{ $zone['active'] }} occupied &middot; {{ $zone['available'] }} free
+                            <span
+                                class="text-xs font-mono {{ $zone['available'] > 0 ? 'text-green-400' : 'text-red-400' }}">
+                                {{ $zone['occupied'] }} / {{ $zone['active'] }} occupied &middot; {{ $zone['available'] }}
+                                free
                             </span>
                         </div>
                         <div class="w-full bg-zinc-800 rounded-full h-3 overflow-hidden">
                             <div class="h-full rounded-full transition-all duration-500 {{ $zone['occupancy'] > 80 ? 'bg-red-500' : ($zone['occupancy'] > 50 ? 'bg-amber-500' : 'bg-green-500') }}"
-                                 style="width: {{ $zone['occupancy'] }}%;"></div>
+                                style="width: {{ $zone['occupancy'] }}%;"></div>
                         </div>
                         <p class="text-right text-xs text-zinc-500 mt-0.5">{{ $zone['occupancy'] }}%</p>
                     </div>
@@ -67,8 +69,8 @@
                     @foreach($allTimeSlots as $slot)
                         <div class="flex-1 flex flex-col items-center justify-end h-full">
                             <div class="w-full bg-blue-500/80 rounded-t transition-all duration-500 min-h-[2px]"
-                                 style="height: {{ ($slot['count'] / $maxSlotCount) * 100 }}%;"
-                                 title="{{ $slot['hour'] }}: {{ $slot['count'] }} reservations"></div>
+                                style="height: {{ ($slot['count'] / $maxSlotCount) * 100 }}%;"
+                                title="{{ $slot['hour'] }}: {{ $slot['count'] }} reservations"></div>
                         </div>
                     @endforeach
                 </div>
@@ -92,7 +94,7 @@
                         <div class="flex-1 flex flex-col items-center justify-end h-full">
                             <span class="text-xs text-zinc-400 font-mono mb-1">{{ $day['count'] }}</span>
                             <div class="w-full bg-purple-500/80 rounded-t transition-all duration-500 min-h-[2px]"
-                                 style="height: {{ ($day['count'] / $maxDayCount) * 100 }}%;"></div>
+                                style="height: {{ ($day['count'] / $maxDayCount) * 100 }}%;"></div>
                             <span class="text-xs text-zinc-500 mt-1">{{ $day['day'] }}</span>
                         </div>
                     @endforeach
@@ -119,32 +121,32 @@
                         </thead>
                         <tbody class="divide-y divide-zinc-800/50">
                             @foreach($recentReservations as $reservation)
-                                <tr class="text-zinc-300">
-                                    <td class="py-2.5">{{ $reservation->user->name ?? '—' }}</td>
-                                    <td class="py-2.5 font-mono text-xs">{{ $reservation->vehicle->license_plate ?? '—' }}</td>
-                                    <td class="py-2.5">
-                                        {{ $reservation->parkingSpot->zone->name ?? '' }}
-                                        {{ $reservation->parkingSpot->spot_number ?? '—' }}
-                                    </td>
-                                    <td class="py-2.5 text-xs font-mono">
-                                        {{ \Carbon\Carbon::parse($reservation->start_time)->format('M d, H:i') }}
-                                        &rarr;
-                                        {{ \Carbon\Carbon::parse($reservation->end_time)->format('H:i') }}
-                                    </td>
-                                    <td class="py-2.5">
-                                        <span class="px-2 py-0.5 rounded-full text-xs font-medium
-                                            {{ match($reservation->status) {
-                                                'confirmed' => 'bg-green-500/20 text-green-400',
-                                                'pending' => 'bg-amber-500/20 text-amber-400',
-                                                'checked_in' => 'bg-blue-500/20 text-blue-400',
-                                                'checked_out' => 'bg-zinc-500/20 text-zinc-400',
-                                                'cancelled' => 'bg-red-500/20 text-red-400',
-                                                default => 'bg-zinc-500/20 text-zinc-400',
-                                            } }}">
-                                            {{ ucfirst(str_replace('_', ' ', $reservation->status)) }}
-                                        </span>
-                                    </td>
-                                </tr>
+                                                <tr class="text-zinc-300">
+                                                    <td class="py-2.5">{{ $reservation->user->name ?? '—' }}</td>
+                                                    <td class="py-2.5 font-mono text-xs">{{ $reservation->vehicle->license_plate ?? '—' }}</td>
+                                                    <td class="py-2.5">
+                                                        {{ $reservation->parkingSpot->zone->name ?? '' }}
+                                                        {{ $reservation->parkingSpot->spot_number ?? '—' }}
+                                                    </td>
+                                                    <td class="py-2.5 text-xs font-mono">
+                                                        {{ \Carbon\Carbon::parse($reservation->start_time)->format('M d, H:i') }}
+                                                        &rarr;
+                                                        {{ \Carbon\Carbon::parse($reservation->end_time)->format('H:i') }}
+                                                    </td>
+                                                    <td class="py-2.5">
+                                                        <span class="px-2 py-0.5 rounded-full text-xs font-medium
+                                                                    {{ match ($reservation->status) {
+                                    'confirmed' => 'bg-green-500/20 text-green-400',
+                                    'pending' => 'bg-amber-500/20 text-amber-400',
+                                    'checked_in' => 'bg-blue-500/20 text-blue-400',
+                                    'checked_out' => 'bg-zinc-500/20 text-zinc-400',
+                                    'cancelled' => 'bg-red-500/20 text-red-400',
+                                    default => 'bg-zinc-500/20 text-zinc-400',
+                                } }}">
+                                                            {{ ucfirst(str_replace('_', ' ', $reservation->status)) }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
                             @endforeach
                         </tbody>
                     </table>
@@ -154,7 +156,8 @@
 
         <!-- Quick Links -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <a href="{{ route('admin.parking-spots') }}" class="group bg-zinc-900 border border-zinc-800 rounded-lg p-6 hover:border-zinc-600 transition-colors">
+            <a href="{{ route('admin.parking-spots') }}"
+                class="group bg-zinc-900 border border-zinc-800 rounded-lg p-6 hover:border-zinc-600 transition-colors">
                 <div class="flex justify-between items-start">
                     <div>
                         <h3 class="font-bold text-lg text-white mb-2">Manage Parking Spots</h3>
@@ -163,7 +166,8 @@
                 </div>
             </a>
 
-            <a href="{{ route('dashboard.admin.map') }}" class="group bg-zinc-900 border border-zinc-800 rounded-lg p-6 hover:border-zinc-600 transition-colors">
+            <a href="{{ route('dashboard.admin.map') }}"
+                class="group bg-zinc-900 border border-zinc-800 rounded-lg p-6 hover:border-zinc-600 transition-colors">
                 <div class="flex justify-between items-start">
                     <div>
                         <h3 class="font-bold text-lg text-white mb-2">Map — Add Spots</h3>
@@ -172,7 +176,8 @@
                 </div>
             </a>
 
-            <a href="{{ route('admin.reservations') }}" class="group bg-zinc-900 border border-zinc-800 rounded-lg p-6 hover:border-zinc-600 transition-colors">
+            <a href="{{ route('admin.reservations') }}"
+                class="group bg-zinc-900 border border-zinc-800 rounded-lg p-6 hover:border-zinc-600 transition-colors">
                 <div class="flex justify-between items-start">
                     <div>
                         <h3 class="font-bold text-lg text-white mb-2">Manage Reservations</h3>
