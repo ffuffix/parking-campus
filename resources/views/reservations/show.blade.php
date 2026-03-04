@@ -57,6 +57,61 @@
                 </div>
             </div>
 
+            {{-- Weather forecast for upcoming reservations --}}
+            @if($weather && !empty($weather['daily']))
+                @php
+                    $daily = $weather['daily'];
+                    $badWeather = $daily['precipitation_probability'] > 50
+                        || in_array($daily['weather_code'], [65,66,67,71,73,75,77,80,81,82,85,86,95,96,99]);
+                @endphp
+                <div class="pt-6 border-t border-zinc-800">
+                    <h3 class="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-3">Weather Forecast</h3>
+
+                    <div class="bg-black border border-zinc-800 rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl">{{ $daily['icon'] }}</span>
+                                <div>
+                                    <p class="text-white font-medium">{{ $daily['description'] }}</p>
+                                    <p class="text-zinc-500 text-xs">{{ $reservation->start_time->translatedFormat('l j F') }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-white text-lg font-semibold">
+                                    {{ round($daily['temp_max']) }}° / {{ round($daily['temp_min']) }}°
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="bg-zinc-900 rounded-lg p-3 text-center">
+                                <p class="text-zinc-500 text-xs mb-1">Rain chance</p>
+                                <p class="text-white font-semibold text-sm">{{ $daily['precipitation_probability'] }}%</p>
+                            </div>
+                            <div class="bg-zinc-900 rounded-lg p-3 text-center">
+                                <p class="text-zinc-500 text-xs mb-1">Precipitation</p>
+                                <p class="text-white font-semibold text-sm">{{ $daily['precipitation_sum'] }} mm</p>
+                            </div>
+                            <div class="bg-zinc-900 rounded-lg p-3 text-center">
+                                <p class="text-zinc-500 text-xs mb-1">Wind</p>
+                                <p class="text-white font-semibold text-sm">{{ round($daily['wind_speed_max']) }} km/h</p>
+                            </div>
+                        </div>
+
+                        @if($badWeather)
+                            <div class="mt-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 flex items-start gap-2">
+                                <svg class="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                                <p class="text-yellow-500 text-xs">
+                                    <strong>Bad weather expected!</strong> Rain, snow or storms are forecast for this day. Consider switching to a covered parking spot to protect your vehicle.
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
             @if($reservation->status === 'pending' || $reservation->status === 'confirmed')
             <div class="pt-6 border-t border-zinc-800 flex justify-end gap-4">
                 <a href="{{ route('reservations.edit', $reservation) }}" class="text-zinc-400 hover:text-white transition-colors font-medium">Edit</a>

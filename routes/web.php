@@ -38,6 +38,7 @@ Route::middleware(['auth'])->group(function () {
     // Admin routes
     Route::middleware(['admin'])->group(function () {
         Route::get('/dashboard/admin', [DashboardController::class, 'admin'])->name('dashboard.admin');
+        Route::get('/dashboard/admin/map', [DashboardController::class, 'adminMap'])->name('dashboard.admin.map');
         Route::resource('parkingSpots', ParkingSpotController::class);
         Route::get('/dashboard/admin/parking-spots', [ParkingSpotController::class, 'index'])->name('admin.parking-spots');
         Route::get('/dashboard/admin/reservations', [ReservationController::class, 'adminIndex'])->name('admin.reservations');

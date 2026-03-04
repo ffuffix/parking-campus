@@ -50,3 +50,59 @@ Route::get('/available-spots', function (\Illuminate\Http\Request $request) {
 
     return response()->json($spots);
 })->name('api.available-spots');
+
+// Admin: Create parking spot from map
+Route::post('/admin/parking-spots', function (\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'zone_id' => 'required|exists:zones,id',
+        'spot_number' => 'required|string|max:20',
+        'type' => 'required|in:regular,electric,handicap',
+        'is_active' => 'boolean',
+        'latitude' => 'nullable|numeric',
+        'longitude' => 'nullable|numeric',
+    ]);
+
+    $validated['is_active'] = $validated['is_active'] ?? true;
+
+    // Check uniqueness within zone
+    $exists = \App\Models\ParkingSpot::where('zone_id', $validated['zone_id'])
+        ->where('spot_number', $validated['spot_number'])
+        ->exists();
+
+    if ($exists) {
+        return response()->json([
+            'message' => 'A spot with this number already exists in this zone.',
+            'errors' => ['spot_number' => ['Spot number already taken in this zone.']]
+        ], 422);
+    }
+
+    $spot = \App\Models\ParkingSpot::create($validated);
+
+    // Clear map cache so zone counts refresh
+    \Illuminate\Support\Facades\Cache::forget('map_data');
+
+    return response()->json($spot->load('zone'), 201);
+})->name('api.admin.parking-spots.store');
+
+// Admin: Get all parking spots with coordinates
+Route::get('/admin/parking-spots', function () {
+    $spots = \App\Models\ParkingSpot::with('zone')
+        ->whereNotNull('latitude')
+        ->whereNotNull('longitude')
+        ->get()
+        ->map(function ($spot) {
+            return [
+                'id' => $spot->id,
+                'spot_number' => $spot->spot_number,
+                'type' => $spot->type,
+                'is_active' => $spot->is_active,
+                'latitude' => $spot->latitude,
+                'longitude' => $spot->longitude,
+                'zone_name' => $spot->zone->name ?? 'Unknown',
+                'zone_id' => $spot->zone_id,
+                'is_occupied' => $spot->is_occupied(),
+            ];
+        });
+
+    return response()->json($spots);
+})->name('api.admin.parking-spots.index');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reservation;
+use App\Services\WeatherAPI;
 use Illuminate\Http\Request;
 
 class ReservationController extends Controller
@@ -10,10 +11,30 @@ class ReservationController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(WeatherAPI $weatherAPI)
     {
-        $reservations = auth()->user()->reservations()->with(['vehicle', 'parkingSpot'])->orderBy('start_time', 'desc')->get();
-        return view('reservations.index', compact('reservations'));
+        $reservations = auth()->user()->reservations()->with(['vehicle', 'parkingSpot.zone'])->orderBy('start_time', 'desc')->get();
+
+        // Fetch weather for upcoming reservations (next 7 days)
+        $weatherWarnings = [];
+        foreach ($reservations as $reservation) {
+            if (in_array($reservation->status, ['cancelled', 'checked_out'])) continue;
+            if ($reservation->start_time->isPast()) continue;
+            if ($reservation->start_time->diffInDays(now()) > 7) continue;
+
+            $forecast = $weatherAPI->get_forecast($reservation->start_time->format('Y-m-d'));
+            if ($forecast && !empty($forecast['daily'])) {
+                $daily = $forecast['daily'];
+                $weatherWarnings[$reservation->id] = [
+                    'icon' => $daily['icon'],
+                    'description' => $daily['description'],
+                    'precipitation_probability' => $daily['precipitation_probability'],
+                    'bad_weather' => $daily['precipitation_probability'] > 50 || in_array($daily['weather_code'], [65, 66, 67, 71, 73, 75, 77, 80, 81, 82, 85, 86, 95, 96, 99]),
+                ];
+            }
+        }
+
+        return view('reservations.index', compact('reservations', 'weatherWarnings'));
     }
 
     /**
@@ -71,12 +92,22 @@ class ReservationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Reservation $reservation)
+    public function show(Reservation $reservation, WeatherAPI $weatherAPI)
     {
         if ($reservation->user_id !== auth()->id() && !auth()->user()->is_admin) {
             abort(403);
         }
-        return view('reservations.show', compact('reservation'));
+
+        // Fetch weather if reservation is upcoming (within 7 days)
+        $weather = null;
+        if (!in_array($reservation->status, ['cancelled', 'checked_out'])
+            && $reservation->start_time->isFuture()
+            && $reservation->start_time->diffInDays(now()) <= 7
+        ) {
+            $weather = $weatherAPI->get_forecast($reservation->start_time->format('Y-m-d'));
+        }
+
+        return view('reservations.show', compact('reservation', 'weather'));
     }
 
     /**

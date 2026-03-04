@@ -14,10 +14,14 @@ class ParkingSpot extends Model
         'spot_number',
         'type',
         'is_active',
+        'latitude',
+        'longitude',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     public function zone()
