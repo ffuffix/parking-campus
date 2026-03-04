@@ -48,55 +48,56 @@
     <script>
         const mapData = @json($mapData);
 
-        // Zone color mapping
+        // Zone colour mapping
         const zoneColors = {
             'Visitors': '#3b82f6',
-            'Staff': '#10b981',
+            'Staff':    '#10b981',
             'Electric': '#f59e0b',
             'Students': '#8b5cf6',
         };
+
+        // Half-dimensions of a parking-spot rectangle in degrees
+        const SPOT_HALF_LAT = 0.000022;
+        const SPOT_HALF_LNG = 0.000015;
 
         // Initialize map
         const map = L.map('map', {
             zoomControl: false,
         }).setView([mapData.center.lat, mapData.center.lng], mapData.zoom);
 
-        // Add zoom control to bottom-left
         L.control.zoom({ position: 'bottomleft' }).addTo(map);
 
-        // Add tile layer
         L.tileLayer(mapData.tileUrl, {
             attribution: mapData.attribution,
             maxZoom: 19,
         }).addTo(map);
 
-        // Store markers for refresh
-        let markers = [];
+        // Store layers for refresh
+        let zoneMarkers = [];
+        let spotLayers  = [];
 
+        // ── Zone circles (area overview) ─────────────────────────────
         function addZoneMarkers(zones) {
-            // Clear existing markers
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
+            zoneMarkers.forEach(m => map.removeLayer(m));
+            zoneMarkers = [];
 
             zones.forEach(zone => {
                 if (!zone.lat || !zone.lng) return;
 
-                const color = zoneColors[zone.name] || '#6b7280';
+                const color     = zoneColors[zone.name] || '#6b7280';
                 const available = zone.available_spots;
-                const total = zone.max_spots;
-                const percentage = zone.occupancy_percentage;
+                const total     = zone.max_spots;
+                const pct       = zone.occupancy_percentage;
 
-                // Create a circle marker for the zone
                 const circle = L.circleMarker([zone.lat, zone.lng], {
-                    radius: 25 + (total / 5),
-                    fillColor: color,
-                    color: available > 0 ? color : '#ef4444',
-                    weight: 2,
-                    opacity: 0.9,
-                    fillOpacity: 0.3,
+                    radius:      25 + (total / 5),
+                    fillColor:   color,
+                    color:       available > 0 ? color : '#ef4444',
+                    weight:      2,
+                    opacity:     0.6,
+                    fillOpacity: 0.12,
                 }).addTo(map);
 
-                // Popup with zone details
                 circle.bindPopup(`
                     <div style="font-family: Inter, sans-serif; min-width: 180px;">
                         <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">${zone.name}</h3>
@@ -106,13 +107,12 @@
                             <span style="font-weight: 600; color: ${available > 0 ? '#16a34a' : '#dc2626'};">${available} / ${total}</span>
                         </div>
                         <div style="background: #e5e7eb; border-radius: 4px; height: 6px; overflow: hidden;">
-                            <div style="background: ${percentage > 80 ? '#ef4444' : percentage > 50 ? '#f59e0b' : '#22c55e'}; width: ${percentage}%; height: 100%; border-radius: 4px;"></div>
+                            <div style="background: ${pct > 80 ? '#ef4444' : pct > 50 ? '#f59e0b' : '#22c55e'}; width: ${pct}%; height: 100%; border-radius: 4px;"></div>
                         </div>
-                        <p style="margin: 4px 0 0 0; font-size: 12px; color: #888;">${percentage}% occupied</p>
+                        <p style="margin: 4px 0 0 0; font-size: 12px; color: #888;">${pct}% occupied</p>
                     </div>
                 `);
 
-                // Add a label on the marker
                 const label = L.marker([zone.lat, zone.lng], {
                     icon: L.divIcon({
                         className: 'zone-label',
@@ -134,12 +134,69 @@
                     })
                 }).addTo(map);
 
-                markers.push(circle, label);
+                zoneMarkers.push(circle, label);
             });
+        }
+
+        // ── Individual spot rectangles ────────────────────────────────
+        async function loadSpotRectangles() {
+            try {
+                const res  = await fetch('/api/map/spots');
+                const data = await res.json();
+
+                spotLayers.forEach(l => map.removeLayer(l));
+                spotLayers = [];
+
+                data.spots.forEach(spot => {
+                    const color = zoneColors[spot.zone_name] || '#6b7280';
+
+                    let fillColor, borderColor;
+                    if (spot.is_occupied) {
+                        fillColor   = '#ef4444';
+                        borderColor = '#b91c1c';
+                    } else if (spot.is_reserved) {
+                        fillColor   = '#f59e0b';
+                        borderColor = '#b45309';
+                    } else {
+                        fillColor   = color;
+                        borderColor = color;
+                    }
+
+                    const bounds = [
+                        [spot.latitude  - SPOT_HALF_LAT, spot.longitude - SPOT_HALF_LNG],
+                        [spot.latitude  + SPOT_HALF_LAT, spot.longitude + SPOT_HALF_LNG],
+                    ];
+
+                    const rect = L.rectangle(bounds, {
+                        color:       borderColor,
+                        fillColor:   fillColor,
+                        weight:      1,
+                        opacity:     0.9,
+                        fillOpacity: spot.is_occupied ? 0.75 : 0.55,
+                    }).addTo(map);
+
+                    const statusLabel = spot.is_occupied
+                        ? '🔴 Occupied'
+                        : spot.is_reserved
+                            ? '🟠 Reserved'
+                            : '🟢 Available';
+
+                    rect.bindTooltip(`
+                        <strong>${spot.zone_name} – ${spot.spot_number}</strong><br>
+                        Type: ${spot.type}<br>
+                        ${statusLabel}
+                    `, { sticky: true });
+
+                    spotLayers.push(rect);
+                });
+            } catch (err) {
+                console.error('Failed to load spot rectangles:', err);
+            }
         }
 
         // Initial render
         addZoneMarkers(mapData.zones);
+        loadSpotRectangles();
 
         // Refresh function
         async function refreshMap() {
@@ -147,6 +204,7 @@
                 const response = await fetch('/api/map/zones');
                 const data = await response.json();
                 addZoneMarkers(data.zones);
+                loadSpotRectangles();
             } catch (err) {
                 console.error('Failed to refresh map data:', err);
             }

@@ -10,6 +10,31 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 
 Route::get('/map/zones', [MapController::class, 'zones'])->name('api.map.zones');
 
+// Individual parking spots with coordinates and live status
+Route::get('/map/spots', function () {
+    $spots = \App\Models\ParkingSpot::with('zone')
+        ->where('is_active', true)
+        ->whereNotNull('latitude')
+        ->whereNotNull('longitude')
+        ->get()
+        ->map(function ($spot) {
+            $currentRes = $spot->current_reservation();
+            return [
+                'id'          => $spot->id,
+                'spot_number' => $spot->spot_number,
+                'type'        => $spot->type,
+                'latitude'    => $spot->latitude,
+                'longitude'   => $spot->longitude,
+                'zone_name'   => $spot->zone->name ?? 'Unknown',
+                'zone_id'     => $spot->zone_id,
+                'is_occupied' => $spot->is_occupied(),
+                'is_reserved' => (bool)$currentRes,
+            ];
+        });
+
+    return response()->json(['spots' => $spots]);
+})->name('api.map.spots');
+
 Route::get('/weather/{date}', function (string $date) {
     // Validate date format
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {

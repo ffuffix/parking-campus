@@ -107,15 +107,20 @@
 
         const zoneColors = {
             'Visitors': '#3b82f6',
-            'Staff': '#10b981',
+            'Staff':    '#10b981',
             'Electric': '#f59e0b',
             'Students': '#8b5cf6',
         };
 
+        // Half-dimensions of a parking-spot rectangle in degrees
+        // ~2.4 m tall (lat), ~1.0 m wide (lng) at 52.38°
+        const SPOT_HALF_LAT = 0.000022;
+        const SPOT_HALF_LNG = 0.000015;
+
         let mode = 'view';
-        let clickMarker = null;
-        let selectedLat = null;
-        let selectedLng = null;
+        let previewRect  = null;   // rectangle shown while placing a new spot
+        let selectedLat  = null;
+        let selectedLng  = null;
 
         // Initialize map
         const map = L.map('map', { zoomControl: false })
@@ -128,12 +133,14 @@
             maxZoom: 19,
         }).addTo(map);
 
-        // Store markers
-        let markers = [];
+        // ── Layer groups ─────────────────────────────────────────────
+        let zoneMarkers = [];   // zone-level circles / labels
+        let spotLayers  = [];   // individual spot rectangles
 
+        // ── Zone circles (overview) ───────────────────────────────────
         function addZoneMarkers(zones) {
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
+            zoneMarkers.forEach(m => map.removeLayer(m));
+            zoneMarkers = [];
 
             zones.forEach(zone => {
                 if (!zone.lat || !zone.lng) return;
@@ -141,12 +148,12 @@
                 const color = zoneColors[zone.name] || '#6b7280';
 
                 const circle = L.circleMarker([zone.lat, zone.lng], {
-                    radius: 25 + (zone.max_spots / 5),
-                    fillColor: color,
-                    color: zone.available_spots > 0 ? color : '#ef4444',
-                    weight: 2,
-                    opacity: 0.9,
-                    fillOpacity: 0.3,
+                    radius:      25 + (zone.max_spots / 5),
+                    fillColor:   color,
+                    color:       zone.available_spots > 0 ? color : '#ef4444',
+                    weight:      2,
+                    opacity:     0.6,
+                    fillOpacity: 0.12,
                 }).addTo(map);
 
                 circle.bindPopup(`
@@ -185,69 +192,128 @@
                     })
                 }).addTo(map);
 
-                markers.push(circle, label);
+                zoneMarkers.push(circle, label);
             });
         }
 
-        addZoneMarkers(mapData.zones);
+        // ── Individual spot rectangles ────────────────────────────────
+        async function loadSpotRectangles() {
+            try {
+                const res  = await fetch('/api/admin/parking-spots');
+                const spots = await res.json();
 
-        // Mode switching
+                // Clear old layers
+                spotLayers.forEach(l => map.removeLayer(l));
+                spotLayers = [];
+
+                spots.forEach(spot => {
+                    const color = zoneColors[spot.zone_name] || '#6b7280';
+
+                    let fillColor, borderColor;
+                    if (spot.is_occupied) {
+                        fillColor   = '#ef4444'; // red – currently occupied
+                        borderColor = '#b91c1c';
+                    } else {
+                        fillColor   = color;     // zone color – available
+                        borderColor = color;
+                    }
+
+                    const bounds = [
+                        [spot.latitude  - SPOT_HALF_LAT, spot.longitude - SPOT_HALF_LNG],
+                        [spot.latitude  + SPOT_HALF_LAT, spot.longitude + SPOT_HALF_LNG],
+                    ];
+
+                    const rect = L.rectangle(bounds, {
+                        color:       borderColor,
+                        fillColor:   fillColor,
+                        weight:      1,
+                        opacity:     0.9,
+                        fillOpacity: spot.is_occupied ? 0.75 : 0.55,
+                    }).addTo(map);
+
+                    rect.bindTooltip(`
+                        <strong>${spot.zone_name} – ${spot.spot_number}</strong><br>
+                        Type: ${spot.type}<br>
+                        Status: ${spot.is_occupied ? '🔴 Occupied' : '🟢 Available'}
+                    `, { sticky: true });
+
+                    spotLayers.push(rect);
+                });
+            } catch (err) {
+                console.error('Failed to load spot rectangles:', err);
+            }
+        }
+
+        // Initial render
+        addZoneMarkers(mapData.zones);
+        loadSpotRectangles();
+
+        // ── Mode switching ────────────────────────────────────────────
         function setMode(newMode) {
             mode = newMode;
             const btnView = document.getElementById('btn-view');
-            const btnAdd = document.getElementById('btn-add');
-            const form = document.getElementById('add-spot-form');
+            const btnAdd  = document.getElementById('btn-add');
+            const form    = document.getElementById('add-spot-form');
 
             if (mode === 'view') {
                 btnView.className = 'flex-1 text-xs py-1.5 px-3 rounded-lg bg-white text-black font-medium transition-colors';
-                btnAdd.className = 'flex-1 text-xs py-1.5 px-3 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-zinc-700 transition-colors';
+                btnAdd.className  = 'flex-1 text-xs py-1.5 px-3 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-zinc-700 transition-colors';
                 form.classList.add('hidden');
                 map.getContainer().style.cursor = '';
-                if (clickMarker) { map.removeLayer(clickMarker); clickMarker = null; }
+                if (previewRect) { map.removeLayer(previewRect); previewRect = null; }
+                selectedLat = null;
+                selectedLng = null;
             } else {
                 btnView.className = 'flex-1 text-xs py-1.5 px-3 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-zinc-700 transition-colors';
-                btnAdd.className = 'flex-1 text-xs py-1.5 px-3 rounded-lg bg-white text-black font-medium transition-colors';
+                btnAdd.className  = 'flex-1 text-xs py-1.5 px-3 rounded-lg bg-white text-black font-medium transition-colors';
                 form.classList.remove('hidden');
                 map.getContainer().style.cursor = 'crosshair';
             }
         }
 
-        // Map click handler for adding spots
+        // ── Map click: place a rectangle preview ──────────────────────
         map.on('click', function (e) {
             if (mode !== 'add') return;
 
-            selectedLat = e.latlng.lat.toFixed(7);
-            selectedLng = e.latlng.lng.toFixed(7);
+            selectedLat = parseFloat(e.latlng.lat.toFixed(7));
+            selectedLng = parseFloat(e.latlng.lng.toFixed(7));
 
             document.getElementById('coord-lat').textContent = selectedLat;
             document.getElementById('coord-lng').textContent = selectedLng;
             document.getElementById('coords-display').classList.remove('hidden');
             document.getElementById('create-spot-btn').disabled = false;
 
-            if (clickMarker) map.removeLayer(clickMarker);
+            // Remove old preview
+            if (previewRect) map.removeLayer(previewRect);
 
-            clickMarker = L.marker([e.latlng.lat, e.latlng.lng], {
-                icon: L.divIcon({
-                    className: '',
-                    html: '<div style="width: 24px; height: 24px; background: #ef4444; border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.5);"></div>',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12],
-                })
+            // Draw a rectangle the size of a real parking bay
+            previewRect = L.rectangle([
+                [selectedLat - SPOT_HALF_LAT, selectedLng - SPOT_HALF_LNG],
+                [selectedLat + SPOT_HALF_LAT, selectedLng + SPOT_HALF_LNG],
+            ], {
+                color:       'white',
+                fillColor:   '#ef4444',
+                weight:      2,
+                opacity:     1,
+                fillOpacity: 0.7,
+                dashArray:   '4 4',
             }).addTo(map);
+
+            previewRect.bindTooltip('New spot preview', { permanent: false });
         });
 
-        // Create parking spot
+        // ── Create parking spot ───────────────────────────────────────
         async function createSpot() {
-            const errorEl = document.getElementById('add-spot-error');
+            const errorEl   = document.getElementById('add-spot-error');
             const successEl = document.getElementById('add-spot-success');
-            const btn = document.getElementById('create-spot-btn');
+            const btn       = document.getElementById('create-spot-btn');
 
             errorEl.classList.add('hidden');
             successEl.classList.add('hidden');
 
-            const zoneId = document.getElementById('new-zone').value;
+            const zoneId     = document.getElementById('new-zone').value;
             const spotNumber = document.getElementById('new-spot-number').value.trim();
-            const type = document.getElementById('new-type').value;
+            const type       = document.getElementById('new-type').value;
 
             if (!spotNumber) {
                 errorEl.textContent = 'Please enter a spot number.';
@@ -261,24 +327,24 @@
                 return;
             }
 
-            btn.disabled = true;
-            btn.textContent = 'Creating...';
+            btn.disabled    = true;
+            btn.textContent = 'Creating…';
 
             try {
                 const response = await fetch('/api/admin/parking-spots', {
-                    method: 'POST',
+                    method:  'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json',
+                        'Content-Type':  'application/json',
+                        'X-CSRF-TOKEN':  csrfToken,
+                        'Accept':        'application/json',
                     },
                     body: JSON.stringify({
-                        zone_id: zoneId,
+                        zone_id:     zoneId,
                         spot_number: spotNumber,
-                        type: type,
-                        latitude: parseFloat(selectedLat),
-                        longitude: parseFloat(selectedLng),
-                        is_active: true,
+                        type:        type,
+                        latitude:    selectedLat,
+                        longitude:   selectedLng,
+                        is_active:   true,
                     }),
                 });
 
@@ -294,24 +360,26 @@
                 successEl.textContent = `Spot ${spotNumber} created successfully!`;
                 successEl.classList.remove('hidden');
 
-                // Reset form
+                // Reset form state
                 document.getElementById('new-spot-number').value = '';
-                if (clickMarker) { map.removeLayer(clickMarker); clickMarker = null; }
+                if (previewRect) { map.removeLayer(previewRect); previewRect = null; }
                 document.getElementById('coords-display').classList.add('hidden');
-                selectedLat = null;
-                selectedLng = null;
+                btn.disabled = true;
+                selectedLat  = null;
+                selectedLng  = null;
 
-                // Refresh map data
-                const mapResponse = await fetch('/api/map/zones');
-                const newMapData = await mapResponse.json();
+                // Refresh both layers
+                const mapRes     = await fetch('/api/map/zones');
+                const newMapData = await mapRes.json();
                 addZoneMarkers(newMapData.zones);
+                loadSpotRectangles();
 
                 setTimeout(() => successEl.classList.add('hidden'), 3000);
             } catch (err) {
                 errorEl.textContent = err.message;
                 errorEl.classList.remove('hidden');
             } finally {
-                btn.disabled = false;
+                btn.disabled    = false;
                 btn.textContent = 'Create Parking Spot';
             }
         }
